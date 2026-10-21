@@ -9,10 +9,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
   
-  <!-- SweetAlert2 & Animate.css -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Canvas Confetti สำหรับจุดพลุฉลองถูกรางวัล -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
     :root {
@@ -50,11 +51,11 @@
       display: block;
     }
 
-    /* 🔥 ดีไซน์งวดแบบเรืองแสงสะดุดตา 🔥 */
+    /* ดีไซน์ป้ายรางวัลและงวด */
     .draw-date-glow {
       background: linear-gradient(135deg, #1e3c72, #2a5298);
       color: #fff;
-      padding: 18px 25px;
+      padding: 20px 25px 15px;
       border-radius: 20px;
       box-shadow: 0 0 20px rgba(67, 100, 247, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.2);
       border: 2px solid #6FB1FC;
@@ -74,6 +75,14 @@
       margin: 0;
       color: #fbc02d;
       text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .rule-box {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px;
+      margin-top: 10px;
+      border: 1px dashed rgba(255, 255, 255, 0.4);
     }
 
     .info-bar {
@@ -179,7 +188,6 @@
       box-shadow: 0 5px 15px rgba(0, 82, 212, 0.4);
     }
 
-    /* กล่องคัดลอกบัญชี */
     .account-box {
       background: #f8fbff;
       border: 2px dashed var(--mid-blue);
@@ -203,7 +211,6 @@
     }
     .copy-btn:active { transform: translateY(-50%) scale(0.9); }
 
-    /* Digital Bill */
     #billCaptureArea {
       background: #fff;
       border-radius: 20px;
@@ -232,6 +239,13 @@
       display: inline-block;
       box-shadow: 0 4px 10px rgba(67, 100, 247, 0.3);
     }
+
+    /* กล่องสำหรับบิลที่ถูกรางวัล */
+    .winner-card {
+      border: 2px solid var(--gold) !important;
+      background: linear-gradient(to right, #fff, #fffde7) !important;
+      box-shadow: 0 5px 15px rgba(251, 192, 45, 0.4) !important;
+    }
   </style>
 </head>
 <body>
@@ -242,13 +256,21 @@
 
   <div class="container" style="max-width: 900px;">
     
-    <!-- ป้ายงวดประจำวันที่เรืองแสงสะดุดตา -->
     <div class="draw-date-glow mx-auto" style="max-width: 600px;">
       <div class="small mb-1 text-white-50"><i class="fa-regular fa-calendar-check me-1"></i> เปิดรับจองงวดประจำวันที่</div>
       <h3 id="headerDrawDate">กำลังโหลด...</h3>
+      <!-- ประกาศกติกาให้ชัดเจน -->
+      <div class="rule-box small text-white mx-auto mt-2" style="max-width: 90%;">
+        <i class="fa-solid fa-scale-balanced me-1"></i> <strong>กติกา:</strong> ยึดผลรางวัลตรงกับ <span class="text-warning fw-bold">"เลขท้าย 2 ตัว"</span> ตามสลากกินแบ่งรัฐบาลไทย
+      </div>
+      <!-- ส่วนแสดงผลรางวัลหากงวดนั้นออกแล้ว -->
+      <div id="winningAnnounceBox" class="mt-3 animate__animated animate__tada" style="display: none;">
+        <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill shadow-lg border border-white">
+          <i class="fa-solid fa-trophy text-danger"></i> ผลรางวัลเลขท้าย 2 ตัว งวดนี้คือ: <span id="announceNumber" class="fw-bold fs-5 text-danger"></span>
+        </span>
+      </div>
     </div>
 
-    <!-- แถบข้อมูลราคาและรางวัล -->
     <div class="info-bar mx-auto align-items-center" style="max-width: 600px;">
       <div class="fw-bold fs-5" style="color: var(--primary-blue);">
         <i class="fa-solid fa-sack-dollar text-warning me-1"></i> รางวัล <span id="headerPrize">6,000 บาท</span>
@@ -258,7 +280,6 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
     <ul class="nav nav-pills nav-fill nav-custom mb-4 shadow-sm" id="mainTab" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tabBoard" type="button">
@@ -267,16 +288,13 @@
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabHistory" type="button">
-          <i class="fa-solid fa-magnifying-glass me-1"></i> ประวัติการซื้อ
+          <i class="fa-solid fa-magnifying-glass me-1"></i> ประวัติ/ตรวจรางวัล
         </button>
       </li>
     </ul>
 
     <div class="tab-content">
-      <!-- TAB 1: เลือกเบอร์ -->
       <div class="tab-pane fade show active" id="tabBoard">
-        
-        <!-- แก้ไขบั๊กตัวเลข เลือกแล้ว/ขายแล้ว ตรงนี้ครับ โดยใส่ id ให้ครบ -->
         <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 shadow-sm">
           <div class="fw-bold" style="color: var(--primary-blue);">
             <i class="fa-solid fa-circle-check me-1"></i> เบอร์ว่าง <span id="countAvail" class="fs-5 text-danger">0</span>
@@ -287,19 +305,16 @@
           </div>
         </div>
 
-        <div id="lottoGrid" class="lotto-grid">
-          <!-- JS Generate Grid -->
-        </div>
+        <div id="lottoGrid" class="lotto-grid"></div>
 
         <div class="mt-4 mb-5 text-center">
           <img src="https://i.postimg.cc/8Pyvt0fy/Lotto-Bonus-c-aywi-c-aycr-ng-100.png" alt="การันตีจ่ายจริง" class="footer-img">
         </div>
       </div>
 
-      <!-- TAB 2: ประวัติการซื้อ -->
       <div class="tab-pane fade" id="tabHistory">
         <div class="bg-white p-4 rounded-4 shadow-sm mb-4 border-top border-4 border-primary">
-          <h5 class="fw-bold mb-3" style="color: var(--primary-blue);"><i class="fa-solid fa-receipt me-2"></i>ตรวจสอบบิลย้อนหลัง</h5>
+          <h5 class="fw-bold mb-3" style="color: var(--primary-blue);"><i class="fa-solid fa-search me-2"></i>ตรวจสอบบิล & ตรวจรางวัล</h5>
           <div class="input-group">
             <input type="text" id="searchInput" class="form-control form-control-lg bg-light border-0" placeholder="กรอกชื่อ หรือ เบอร์โทร..." onkeypress="if(event.key==='Enter') searchHistory()">
             <button class="btn btn-gradient px-4 fw-bold" onclick="searchHistory()">ค้นหา</button>
@@ -310,7 +325,6 @@
     </div>
   </div>
 
-  <!-- Bottom Cart -->
   <div id="bottomCartBar" class="bottom-cart-bar">
     <div class="container d-flex justify-content-between align-items-center" style="max-width: 900px;">
       <div>
@@ -339,7 +353,7 @@
             <div class="fs-1 fw-bold mb-2" style="color: var(--primary-blue);"><span id="modalTotalAmount"></span>.-</div>
             
             <div class="account-box mt-3 text-start ps-3 py-3">
-              <div class="small text-muted mb-1">โอนเงินเข้าบัญชี:ธนาคารกรุงไทย สมชาย ดวงแก้ว</div>
+              <div class="small text-muted mb-1">โอนเงินเข้าบัญชี:</div>
               <div class="fw-bold text-dark mb-1" id="modalAccountName"></div>
               <div class="fs-5 fw-bold" style="color: var(--primary-blue);" id="modalBankNumber"></div>
               <button class="copy-btn shadow-sm" onclick="copyAccountNumber()"><i class="fa-regular fa-copy me-1"></i>คัดลอก</button>
@@ -359,7 +373,6 @@
               <img id="slipPreviewImg" src="" class="rounded-3 shadow-sm border border-primary" style="max-height: 200px;">
             </div>
           </div>
-
           <button class="btn btn-gradient btn-lg w-100 rounded-pill fw-bold shadow" onclick="submitOrder()">
             ยืนยันการสั่งซื้อ
           </button>
@@ -386,9 +399,7 @@
               <div class="text-center mb-4">
                 <div class="text-muted small">งวดประจำวันที่</div>
                 <div class="fs-5 fw-bold mb-3" style="color: var(--primary-blue);" id="bill_drawDate"></div>
-                
                 <div id="bill_numbersContainer" class="d-flex flex-wrap justify-content-center gap-2 mb-3"></div>
-                
                 <div class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold shadow-sm" style="font-size: 0.9rem;">
                   <i class="fa-solid fa-sack-dollar me-1"></i> ลุ้นรับ: <span id="bill_prize"></span>
                 </div>
@@ -427,7 +438,6 @@
     // ==========================================================
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbx1hIYWqeXAlG-D1hyVTUMXp0Ixv5wZpl6K9kZcPkg2nVH_ei16wh3aLDnj2MpstuSe/exec';
 
-    // 🔥 ตั้งค่าลูกเล่น SweetAlert2 สุดพรีเมียม 🔥
     const mySwal = Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-gradient rounded-pill px-4 ms-2 shadow-lg',
@@ -466,8 +476,7 @@
       mySwal.fire({ 
         title: 'กำลังเชื่อมต่อระบบ', 
         html: '<div class="spinner-border text-primary my-2" role="status"></div><br><span class="text-muted small">โปรดรอสักครู่ ระบบกำลังดึงข้อมูลล่าสุด</span>',
-        allowOutsideClick: false,
-        showConfirmButton: false
+        allowOutsideClick: false, showConfirmButton: false
       });
       
       try {
@@ -482,6 +491,14 @@
           document.getElementById('headerDrawDate').textContent = formatThaiDate(appSettings.CurrentDraw);
           document.getElementById('headerPrize').textContent = appSettings.GoldPrize;
           document.getElementById('headerPrice').textContent = appSettings.TicketPrice;
+
+          // แสดงผลรางวัลถ้างวดนี้ออกแล้ว
+          if (appSettings.WinningNumber) {
+            document.getElementById('announceNumber').textContent = appSettings.WinningNumber;
+            document.getElementById('winningAnnounceBox').style.display = 'block';
+          } else {
+            document.getElementById('winningAnnounceBox').style.display = 'none';
+          }
           
           renderGrid();
           updateCart();
@@ -510,14 +527,7 @@
           div.className = 'num-card sold animate__animated animate__fadeIn';
           div.innerHTML = `<div class="digits">${numStr}</div><div class="status-label"><i class="fa-solid fa-lock"></i> ปิดขาย</div>`;
           div.onclick = () => {
-             mySwal.fire({
-               icon: 'error',
-               title: 'เบอร์นี้ปิดขายแล้ว',
-               text: `หมายเลข ${numStr} มีผู้สั่งซื้อไปแล้วครับ`,
-               timer: 2000,
-               showConfirmButton: false,
-               showClass: { popup: 'animate__animated animate__shakeX' }
-             });
+             mySwal.fire({ icon: 'error', title: 'เบอร์นี้ปิดขายแล้ว', text: `หมายเลข ${numStr} มีผู้สั่งซื้อไปแล้วครับ`, timer: 2000, showConfirmButton: false, showClass: { popup: 'animate__animated animate__shakeX' } });
           };
         } else {
           div.className = `num-card animate__animated animate__fadeIn ${isSel ? 'selected animate__pulse' : ''}`;
@@ -526,8 +536,6 @@
         }
         grid.appendChild(div);
       }
-      
-      // อัปเดตตัวเลขเบอร์ว่าง, เลือกแล้ว, ขายแล้ว โดยไม่ติดบั๊ก null
       document.getElementById('countAvail').textContent = 100 - sold;
       document.getElementById('countSold').textContent = sold;
       document.getElementById('countSelected').textContent = selectedNumbers.length;
@@ -559,23 +567,13 @@
       document.getElementById('modalTotalAmount').textContent = total.toLocaleString();
       document.getElementById('modalAccountName').textContent = appSettings.AccountName;
       document.getElementById('modalBankNumber').textContent = appSettings.PromptPayID; 
-      
       new bootstrap.Modal(document.getElementById('checkoutModal')).show();
     }
 
     function copyAccountNumber() {
       const accNum = document.getElementById('modalBankNumber').textContent;
       navigator.clipboard.writeText(accNum).then(() => {
-        mySwal.fire({
-          icon: 'success',
-          title: 'คัดลอกสำเร็จ',
-          text: 'เลขบัญชีถูกคัดลอกไปยังคลิปบอร์ดแล้ว',
-          toast: true,
-          position: 'top',
-          timer: 2000,
-          showConfirmButton: false,
-          showClass: { popup: 'animate__animated animate__slideInDown animate__faster' }
-        });
+        mySwal.fire({ icon: 'success', title: 'คัดลอกสำเร็จ', text: 'เลขบัญชีถูกคัดลอกแล้ว', toast: true, position: 'top', timer: 2000, showConfirmButton: false });
       });
     }
 
@@ -588,18 +586,16 @@
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const max = 800;
           let w = img.width, h = img.height;
-          if (w > max || h > max) {
-            if (w > h) { h = Math.round(h * max / w); w = max; } 
-            else { w = Math.round(w * max / h); h = max; }
+          if (w > 800 || h > 800) {
+            if (w > h) { h = Math.round(h * 800 / w); w = 800; } 
+            else { w = Math.round(w * 800 / h); h = 800; }
           }
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           currentSlipBase64 = canvas.toDataURL('image/jpeg', 0.8);
           document.getElementById('slipPreviewImg').src = currentSlipBase64;
           document.getElementById('slipPreviewBox').style.display = 'block';
-          document.getElementById('slipPreviewBox').classList.add('animate__animated', 'animate__zoomIn');
         };
         img.src = e.target.result;
       };
@@ -610,56 +606,25 @@
       const name = document.getElementById('custNameInput').value.trim();
       const phone = document.getElementById('custPhoneInput').value.trim();
       if (!name || !phone || !currentSlipBase64) {
-        return mySwal.fire({ 
-          icon: 'warning', 
-          title: 'ข้อมูลไม่ครบถ้วน', 
-          text: 'กรุณากรอกชื่อ เบอร์โทร และแนบสลิปโอนเงินให้เรียบร้อยครับ',
-          showClass: { popup: 'animate__animated animate__headShake' }
-        });
+        return mySwal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกชื่อ เบอร์โทร และแนบสลิปโอนเงิน' });
       }
 
-      mySwal.fire({ 
-        title: 'กำลังดำเนินการ...', 
-        html: '<div class="spinner-border text-primary my-2" role="status"></div><br><span class="text-muted small">ระบบกำลังจองเบอร์และออกบิลให้ท่าน</span>', 
-        allowOutsideClick: false, 
-        showConfirmButton: false
-      });
-
+      mySwal.fire({ title: 'กำลังดำเนินการ...', html: '<div class="spinner-border text-primary my-2"></div>', allowOutsideClick: false, showConfirmButton: false });
       try {
-        const res = await callApi({
-          action: 'bookNumbers', drawDate: appSettings.CurrentDraw,
-          numbers: selectedNumbers, customerName: name, phone: phone,
-          slipBase64: currentSlipBase64, slipFileName: currentSlipName
-        });
-        
+        const res = await callApi({ action: 'bookNumbers', drawDate: appSettings.CurrentDraw, numbers: selectedNumbers, customerName: name, phone: phone, slipBase64: currentSlipBase64, slipFileName: currentSlipName });
         mySwal.close();
         if (res.status === 'success') {
           bootstrap.Modal.getInstance(document.getElementById('checkoutModal')).hide();
-          
-          mySwal.fire({
-            icon: 'success',
-            title: 'สั่งซื้อสำเร็จ!',
-            text: 'ระบบได้ออกบิลให้ท่านเรียบร้อยแล้ว',
-            timer: 2000,
-            showConfirmButton: false,
-            showClass: { popup: 'animate__animated animate__tada' }
-          }).then(() => {
+          mySwal.fire({ icon: 'success', title: 'สั่งซื้อสำเร็จ!', text: 'ระบบได้ออกบิลให้ท่านเรียบร้อยแล้ว', timer: 2000, showConfirmButton: false }).then(() => {
             showBill(res.billData);
             loadData();
           });
-          
         } else {
-          mySwal.fire({ 
-            icon: 'error', 
-            title: 'การจองไม่สำเร็จ', 
-            text: res.message,
-            showClass: { popup: 'animate__animated animate__shakeX' }
-          });
+          mySwal.fire({ icon: 'error', title: 'การจองไม่สำเร็จ', text: res.message });
           loadData();
         }
       } catch (err) {
-        mySwal.close(); 
-        mySwal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.toString() });
+        mySwal.close(); mySwal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.toString() });
       }
     }
 
@@ -671,7 +636,6 @@
       document.getElementById('bill_custName').textContent = b.customerName;
       document.getElementById('bill_custPhone').textContent = b.phone;
       document.getElementById('bill_totalAmount').textContent = Number(b.totalAmount).toLocaleString() + ' ฿';
-      
       const box = document.getElementById('bill_numbersContainer');
       box.innerHTML = '';
       b.numbers.forEach(n => {
@@ -690,50 +654,56 @@
         a.download = `LottoBonus_${document.getElementById('bill_ref').textContent}.png`;
         a.href = canvas.toDataURL('image/png');
         a.click();
-        
-        mySwal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'success',
-          title: 'บันทึกรูปบิลลงเครื่องสำเร็จ',
-          showConfirmButton: false,
-          timer: 3000,
-          showClass: { popup: 'animate__animated animate__fadeInRight' }
-        });
       });
+    }
+
+    // ฟังก์ชันจุดพลุฉลองถูกรางวัล (Confetti)
+    function fireConfetti() {
+      var duration = 3 * 1000;
+      var end = Date.now() + duration;
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#fbc02d', '#4364F7'] });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#fbc02d', '#4364F7'] });
+        if (Date.now() < end) { requestAnimationFrame(frame); }
+      }());
     }
 
     async function searchHistory() {
       const kw = document.getElementById('searchInput').value.trim();
       if (!kw) return mySwal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกชื่อ หรือ เบอร์โทร' });
       
-      mySwal.fire({ 
-        title: 'กำลังค้นหา...', 
-        html: '<div class="spinner-grow text-primary my-2" role="status"></div>',
-        allowOutsideClick: false, 
-        showConfirmButton: false 
-      });
+      mySwal.fire({ title: 'กำลังตรวจรางวัล...', html: '<div class="spinner-grow text-primary my-2"></div>', allowOutsideClick: false, showConfirmButton: false });
       
       const res = await callApi({ action: 'searchHistory', keyword: kw });
       mySwal.close();
       
       const box = document.getElementById('searchResultsArea');
       box.innerHTML = '';
+      let hasWinner = false;
+
       if (res.status === 'success' && res.data.length > 0) {
         res.data.forEach((item, index) => {
+          if (item.isWinner) hasWinner = true;
+          
+          const winnerClass = item.isWinner ? 'winner-card' : '';
+          const winnerBadge = item.isWinner ? `<div class="badge bg-warning text-dark fs-6 mt-2 py-2 px-3 animate__animated animate__pulse animate__infinite shadow-sm"><i class="fa-solid fa-crown me-1"></i> ยินดีด้วย! ถูกรางวัลเลขท้าย 2 ตัว</div>` : '';
+          const statusBadge = item.isWinner ? `<span class="badge bg-danger shadow-sm fs-6"><i class="fa-solid fa-star me-1"></i> ผู้ชนะรางวัล</span>` : `<span class="badge bg-success mb-2 shadow-sm">${item.status}</span>`;
+          const numStyle = item.isWinner ? `background: linear-gradient(135deg, #fbc02d, #f9a825); color: #fff;` : `background: linear-gradient(135deg, var(--mid-blue), var(--light-blue)); color: #fff;`;
+
           box.innerHTML += `
-            <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex justify-content-between align-items-center animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s; border-left: 5px solid var(--primary-blue);">
-              <div class="d-flex align-items-center gap-3">
-                <div class="text-white rounded-3 px-3 py-2 fs-4 fw-bold" style="background: linear-gradient(135deg, var(--mid-blue), var(--light-blue));">${item.number}</div>
+            <div class="bg-white p-3 rounded-4 shadow-sm mb-3 d-flex justify-content-between align-items-center animate__animated animate__fadeInUp ${winnerClass}" style="animation-delay: ${index * 0.1}s; border-left: 5px solid ${item.isWinner ? 'var(--gold)' : 'var(--primary-blue)'};">
+              <div class="d-flex align-items-center gap-3 w-100 flex-wrap">
+                <div class="rounded-3 px-3 py-2 fs-4 fw-bold shadow-sm" style="${numStyle}">${item.number}</div>
                 <div>
-                  <div class="fw-bold" style="color: var(--dark-blue);">งวด ${formatThaiDate(item.drawDate)}</div>
+                  <div class="fw-bold" style="color: ${item.isWinner ? '#b8860b' : 'var(--dark-blue)'};">งวด ${formatThaiDate(item.drawDate)}</div>
                   <div class="small text-muted">${item.customerName} (${item.phone})</div>
                   <div class="small text-muted" style="font-size: 0.7rem;">Ref: ${item.billRef}</div>
+                  ${winnerBadge}
                 </div>
               </div>
-              <div class="text-end">
-                <span class="badge bg-success mb-2 shadow-sm">${item.status}</span><br>
-                <button class="btn btn-sm btn-outline-primary rounded-pill" onclick='showBill({
+              <div class="text-end mt-2 mt-sm-0" style="min-width: 90px;">
+                ${statusBadge}<br>
+                <button class="btn btn-sm btn-outline-primary rounded-pill mt-2" onclick='showBill({
                   billRef: "${item.billRef}", timestamp: "${item.timestamp}", drawDate: "${item.drawDate}",
                   numbers: ["${item.number}"], customerName: "${item.customerName}", phone: "${item.phone}",
                   totalAmount: ${item.price}, goldPrize: "เงินสด 6,000 บาท"
@@ -741,6 +711,19 @@
               </div>
             </div>`;
         });
+
+        // หากมีรายการที่ถูกรางวัล ให้แสดง Popup แสดงความยินดีพร้อมจุดพลุ
+        if (hasWinner) {
+          fireConfetti();
+          mySwal.fire({
+            title: '🎉 ขอแสดงความยินดี! 🎉',
+            html: '<b style="color:var(--primary-blue); font-size:1.1rem;">คุณมีบิลที่ถูกรางวัลเลขท้าย 2 ตัว!</b><br><span class="small text-muted mt-2 d-block">โปรดติดต่อแอดมินเพื่อรับรางวัลของคุณ</span>',
+            icon: 'success',
+            backdrop: `rgba(0, 51, 128, 0.7)`,
+            confirmButtonText: '<i class="fa-solid fa-gift me-1"></i> ยืนยัน',
+            showClass: { popup: 'animate__animated animate__jackInTheBox' }
+          });
+        }
       } else {
         box.innerHTML = `<div class="text-center text-muted py-5 animate__animated animate__fadeIn"><i class="fa-solid fa-folder-open fa-3x mb-3" style="color: var(--light-blue);"></i><br><h5 class="fw-bold mt-2">ไม่พบประวัติการซื้อ</h5><span class="small">ลองค้นหาด้วยเบอร์โทรศัพท์หรือชื่ออีกครั้ง</span></div>`;
       }
