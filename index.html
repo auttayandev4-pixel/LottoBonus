@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LottoBonus - ระบบหวยเบอร์ทองตามงวดรัฐบาลไทย</title>
+  
+  <!-- Google Fonts: Prompt -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- html2canvas สำหรับสร้างรูปบิลใบเสร็จ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --crimson-dark: #5c0000;
+      --crimson-main: #8f0000;
+      --crimson-light: #b80d0d;
+      --gold-main: #ffd700;
+      --gold-dark: #c59b27;
+      --gold-soft: #fff6d6;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: #f4f1ea;
+      background-image: radial-gradient(#d4af3722 1px, transparent 1px);
+      background-size: 20px 20px;
+      padding-bottom: 100px;
+      color: #2b2b2b;
+    }
+
+    /* Header Luxury Style */
+    .hero-header {
+      background: linear-gradient(135deg, var(--crimson-dark) 0%, var(--crimson-main) 60%, var(--crimson-light) 100%);
+      color: #fff;
+      border-bottom: 4px solid var(--gold-main);
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+      box-shadow: 0 8px 25px rgba(143, 0, 0, 0.35);
+      padding: 24px 16px 28px;
+      position: relative;
+    }
+
+    .gold-badge {
+      background: linear-gradient(90deg, #ffe066, #d4af37, #ffe066);
+      color: #4a0000;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 50px;
+      display: inline-block;
+      font-size: 0.9rem;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    /* Navigation Pills */
+    .nav-custom {
+      background: #fff;
+      border-radius: 50px;
+      padding: 6px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-top: -22px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .nav-custom .nav-link {
+      border-radius: 50px;
+      color: #555;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      transition: all 0.25s;
+    }
+
+    .nav-custom .nav-link.active {
+      background: linear-gradient(135deg, var(--crimson-main), var(--crimson-dark));
+      color: var(--gold-main);
+      box-shadow: 0 4px 10px rgba(143, 0, 0, 0.3);
+    }
+
+    /* Number Grid 00-99 */
+    .lotto-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 768px) {
+      .lotto-grid {
+        grid-template-columns: repeat(10, 1fr);
+        gap: 12px;
+      }
+    }
+
+    .num-card {
+      background: #ffffff;
+      border: 2px solid #e2d9c5;
+      border-radius: 14px;
+      padding: 10px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      user-select: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+    }
+
+    .num-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold-dark);
+    }
+
+    .num-card .digits {
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--crimson-dark);
+    }
+
+    .num-card .status-label {
+      font-size: 0.68rem;
+      color: #777;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 2px;
+    }
+
+    /* Selected State */
+    .num-card.selected {
+      background: linear-gradient(135deg, var(--crimson-main), #b30000);
+      border-color: var(--gold-main);
+      transform: scale(1.04);
+      box-shadow: 0 5px 14px rgba(143, 0, 0, 0.4);
+    }
+    .num-card.selected .digits {
+      color: var(--gold-main);
+    }
+    .num-card.selected .status-label {
+      color: #fff;
+    }
+
+    /* Sold Out State */
+    .num-card.sold {
+      background: linear-gradient(135deg, #fff5cc, #f3d478);
+      border-color: #d4af37;
+      cursor: not-allowed;
+      opacity: 0.92;
+    }
+    .num-card.sold .digits {
+      color: #6e4e00;
+    }
+    .num-card.sold .status-label {
+      color: #8a0000;
+      font-weight: 600;
+    }
+
+    /* Floating Bottom Cart Bar */
+    .bottom-cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 3px solid var(--gold-dark);
+      box-shadow: 0 -5px 25px rgba(0,0,0,0.15);
+      padding: 12px 16px;
+      z-index: 1000;
+      display: none;
+    }
+
+    /* Digital Bill Styling (สำหรับแปลงเป็นรูปภาพ) */
+    #billCaptureArea {
+      background: linear-gradient(180deg, #7a0000 0%, #4a0000 100%);
+      border: 4px solid #ffd700;
+      border-radius: 20px;
+      padding: 20px;
+      color: #fff;
+      max-width: 420px;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .bill-inner-box {
+      background: #fffdf7;
+      color: #2b2b2b;
+      border-radius: 14px;
+      padding: 18px;
+      border: 2px dashed #c59b27;
+    }
+
+    .bill-number-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #8f0000, #5c0000);
+      color: #ffd700;
+      font-size: 1.5rem;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 12px;
+      margin: 4px;
+      border: 2px solid #ffd700;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ส่วนหัวเว็บ (Header) -->
+  <header class="hero-header text-center">
+    <div class="container">
+      <div class="gold-badge mb-2">
+        <i class="fa-solid fa-crown me-1"></i> หวยเบอร์ทอง รัฐบาลไทย (วันที่ 1 และ 16)
+      </div>
+      <h1 class="fw-bold mb-1" style="color: var(--gold-main); text-shadow: 0 2px 6px rgba(0,0,0,0.4);">
+        <i class="fa-solid fa-coins me-2"></i>LottoBonus
+      </h1>
+      <p class="mb-2 small text-white-50">เลือกเบอร์มงคล 2 หลัก ลุ้นรับโชคทองคำแท้ทุกงวด</p>
+      
+      <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap mt-3">
+        <span class="badge bg-dark bg-opacity-50 px-3 py-2 fs-6 rounded-pill border border-warning">
+          <i class="fa-regular fa-calendar-check text-warning me-1"></i> งวดวันที่: <span id="headerDrawDate" class="text-warning fw-bold">กำลังโหลด...</span>
+        </span>
+        <span class="badge bg-dark bg-opacity-50 px-3 py-2 fs-6 rounded-pill border border-warning">
+          <i class="fa-solid fa-award text-warning me-1"></i> รางวัล: <span id="headerPrize" class="text-warning fw-bold">...</span>
+        </span>
+        <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill fw-bold">
+          เบอร์ละ <span id="headerPrice">100</span> ฿
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- เมนูหลัก -->
+  <div class="container" style="max-width: 850px;">
+    <ul class="nav nav-pills nav-fill nav-custom mb-4" id="mainTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="board-tab" data-bs-toggle="pill" data-bs-target="#tabBoard" type="button">
+          <i class="fa-solid fa-border-all me-1"></i> เลือกเบอร์ทอง
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="history-tab" data-bs-toggle="pill" data-bs-target="#tabHistory" type="button">
+          <i class="fa-solid fa-magnifying-glass me-1"></i> ค้นหาบิล/ประวัติ
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="admin-tab" data-bs-toggle="pill" data-bs-target="#tabAdmin" type="button">
+          <i class="fa-solid fa-user-shield me-1"></i> หลังบ้าน
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- ==================== TAB 1: แผงเลือกเบอร์ 00-99 ==================== -->
+      <div class="tab-pane fade show active" id="tabBoard">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-3">
+            <div class="row g-2 align-items-center justify-content-between">
+              <div class="col-12 col-md-6">
+                <div class="d-flex align-items-center gap-2">
+                  <label class="fw-bold small text-nowrap"><i class="fa-solid fa-calendar-day text-danger me-1"></i>เลือกงวด:</label>
+                  <select id="drawSelector" class="form-select form-select-sm rounded-pill fw-semibold" onchange="loadBoardData(this.value)">
+                  </select>
+                  <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="loadBoardData(document.getElementById('drawSelector').value)">
+                    <i class="fa-solid fa-rotate"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 text-md-end">
+                <div class="d-flex justify-content-around justify-content-md-end gap-3 small fw-semibold mt-2 mt-md-0">
+                  <span><span class="legend-dot" style="background:#fff; border:2px solid #ccc;"></span>ว่าง (<span id="countAvail">0</span>)</span>
+                  <span><span class="legend-dot" style="background:#8f0000; border:2px solid #ffd700;"></span>ที่เลือก (<span id="countSelected">0</span>)</span>
+                  <span><span class="legend-dot" style="background:#f3d478; border:2px solid #d4af37;"></span>ขายแล้ว (<span id="countSold">0</span>)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ตารางเบอร์ 00-99 -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-3">
+            <div id="lottoGrid" class="lotto-grid">
+              <!-- สร้างด้วย JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: ค้นหาประวัติการซื้อ ==================== -->
+      <div class="tab-pane fade" id="tabHistory">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold text-danger mb-3"><i class="fa-solid fa-receipt me-2"></i>ตรวจสอบประวัติการซื้อ & ออกบิลย้อนหลัง</h5>
+            <div class="input-group">
+              <input type="text" id="searchInput" class="form-control form-control-lg rounded-start-pill" placeholder="กรอกชื่อ หรือ เบอร์โทรศัพท์..." onkeypress="if(event.key==='Enter') searchCustomerHistory()">
+              <button class="btn btn-danger px-4 rounded-end-pill fw-bold" onclick="searchCustomerHistory()">
+                <i class="fa-solid fa-search me-1"></i> ค้นหา
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="searchResultsArea"></div>
+      </div>
+
+      <!-- ==================== TAB 3: ระบบจัดการหลังบ้าน (Admin) ==================== -->
+      <div class="tab-pane fade" id="tabAdmin">
+        <!-- กล่อง Login แอดมิน -->
+        <div id="adminLoginCard" class="card border-0 shadow-sm rounded-4 mx-auto" style="max-width: 450px;">
+          <div class="card-body p-4 text-center">
+            <div class="mb-3 text-danger">
+              <i class="fa-solid fa-user-lock fa-3x"></i>
+            </div>
+            <h5 class="fw-bold mb-3">เข้าสู่ระบบผู้ดูแล (Admin)</h5>
+            <input type="password" id="adminPassInput" class="form-control form-control-lg text-center rounded-pill mb-3" placeholder="กรอกรหัสผ่านผู้ดูแลระบบ" onkeypress="if(event.key==='Enter') loginAdmin()">
+            <button class="btn btn-danger btn-lg w-100 rounded-pill fw-bold" onclick="loginAdmin()">
+              <i class="fa-solid fa-right-to-bracket me-1"></i> เข้าสู่ระบบ
+            </button>
+          </div>
+        </div>
+
+        <!-- พื้นที่จัดการข้อมูลแอดมิน -->
+        <div id="adminDashboardArea" style="display: none;">
+          <!-- ตั้งค่าระบบ -->
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-danger text-white rounded-top-4 py-3 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold"><i class="fa-solid fa-sliders me-2"></i>ตั้งค่าระบบและงวดปัจจุบัน</h6>
+              <button class="btn btn-sm btn-warning fw-bold rounded-pill" onclick="saveSystemSettings()">
+                <i class="fa-solid fa-floppy-disk me-1"></i> บันทึกตั้งค่า
+              </button>
+            </div>
+            <div class="card-body p-3">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold">งวดวันที่เปิดขายปัจจุบัน (YYYY-MM-DD)</label>
+                  <input type="date" id="set_CurrentDraw" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold">ราคาเบอร์ละ (บาท)</label>
+                  <input type="number" id="set_TicketPrice" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold">เบอร์พร้อมเพย์ / เลขบัตร ปชช.</label>
+                  <input type="text" id="set_PromptPayID" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold">ชื่อบัญชีรับโอน</label>
+                  <input type="text" id="set_AccountName" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold">รายละเอียดรางวัลทอง</label>
+                  <input type="text" id="set_GoldPrize" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold">รหัสผ่านเข้าหลังบ้าน</label>
+                  <input type="text" id="set_AdminPassword" class="form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ตารางรายการสั่งซื้อทั้งหมด -->
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-dark text-warning rounded-top-4 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <h6 class="mb-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>รายการสั่งซื้อทั้งหมด (<span id="adminTotalRows">0</span> รายการ)</h6>
+              <div class="d-flex gap-2">
+                <input type="text" id="adminFilterInput" class="form-control form-control-sm rounded-pill" placeholder="ค้นหาในตาราง..." oninput="renderAdminTable()">
+                <button class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="loadAdminData()">
+                  <i class="fa-solid fa-rotate"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                  <thead class="table-light">
+                    <tr>
+                      <th>งวดวันที่</th>
+                      <th class="text-center">เบอร์</th>
+                      <th>ชื่อลูกค้า</th>
+                      <th>เบอร์โทร</th>
+                      <th>ราคา</th>
+                      <th class="text-center">สลิป</th>
+                      <th>สถานะ</th>
+                      <th class="text-center">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- แถบตะกร้าด้านล่างเมื่อเลือกเลข -->
+  <div id="bottomCartBar" class="bottom-cart-bar">
+    <div class="container" style="max-width: 850px;">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="small text-muted">เบอร์ที่เลือก (<span id="cartCount" class="fw-bold text-danger">0</span> เบอร์): <span id="cartNumbersList" class="fw-bold text-dark"></span></div>
+          <div class="fs-5 fw-bold text-danger">ยอดชำระรวม: <span id="cartTotalPrice">0</span> บาท</div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary rounded-pill px-3" onclick="clearSelection()">ล้าง</button>
+          <button class="btn btn-danger rounded-pill px-4 fw-bold shadow" onclick="openCheckoutModal()">
+            ชำระเงิน <i class="fa-solid fa-circle-chevron-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 1: กรอกข้อมูลและชำระเงินผ่าน QR Code ==================== -->
+  <div class="modal fade" id="checkoutModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header bg-danger text-white rounded-top-4">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-qrcode me-2"></i>ยืนยันการสั่งซื้อและชำระเงิน</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-warning border-warning rounded-3 mb-3 text-center">
+            <div class="small text-muted">งวดประจำวันที่ <span id="modalDrawDate" class="fw-bold text-dark"></span></div>
+            <div class="my-1">เบอร์ที่เลือก: <span id="modalSelectedNums" class="fw-bold fs-5 text-danger"></span></div>
+            <div class="fw-bold fs-4 text-dark">ยอดโอนสุทธิ: <span id="modalTotalAmount" class="text-danger"></span> บาท</div>
+          </div>
+
+          <!-- QR Code PromptPay -->
+          <div class="text-center mb-3 p-3 bg-light rounded-4 border">
+            <div class="fw-bold text-primary mb-2"><i class="fa-solid fa-mobile-screen-button me-1"></i>สแกน QR Code พร้อมเพย์</div>
+            <img id="promptPayQrImg" src="" alt="PromptPay QR" class="img-fluid rounded-3 shadow-sm border bg-white p-2" style="max-width: 210px;">
+            <div class="mt-2 small fw-bold text-dark" id="modalAccountName"></div>
+            <div class="small text-muted">พร้อมเพย์: <span id="modalPromptPayId"></span></div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">ชื่อ-นามสกุล หรือ ชื่อเล่น <span class="text-danger">*</span></label>
+            <input type="text" id="custNameInput" class="form-control rounded-3" placeholder="ระบุชื่อของคุณ">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">เบอร์โทรศัพท์ติดต่อ <span class="text-danger">*</span></label>
+            <input type="tel" id="custPhoneInput" class="form-control rounded-3" placeholder="เช่น 0812345678">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">แนบสลิปการโอนเงิน <span class="text-danger">*</span></label>
+            <input type="file" id="slipFileInput" class="form-control rounded-3" accept="image/*" onchange="previewSlipImage(this)">
+            <div id="slipPreviewBox" class="text-center mt-2" style="display:none;">
+              <img id="slipPreviewImg" src="" class="img-thumbnail rounded-3" style="max-height: 160px;">
+            </div>
+          </div>
+
+          <button class="btn btn-danger btn-lg w-100 rounded-pill fw-bold shadow" onclick="submitOrder()">
+            <i class="fa-solid fa-check-circle me-1"></i> ยืนยันการสั่งซื้อและออกบิล
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: บิลการซื้อรูปแบบรูปภาพสวยงาม ==================== -->
+  <div class="modal fade" id="billModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 bg-transparent">
+        <div class="modal-body p-2">
+          <!-- พื้นที่สำหรับแปลงเป็นรูปภาพ -->
+          <div id="billCaptureArea">
+            <div class="text-center mb-3">
+              <div class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-1">
+                <i class="fa-solid fa-crown me-1"></i> ใบเสร็จรับเงิน / สลากเบอร์ทอง
+              </div>
+              <h3 class="fw-bold mb-0" style="color: #ffd700;">LottoBonus</h3>
+              <div class="small text-white-50">หวยเบอร์ทองตามงวดรัฐบาลไทย</div>
+            </div>
+
+            <div class="bill-inner-box">
+              <div class="d-flex justify-content-between small text-muted border-bottom pb-2 mb-2">
+                <span>เลขที่บิล: <strong id="bill_ref" class="text-dark"></strong></span>
+                <span id="bill_time"></span>
+              </div>
+
+              <div class="text-center my-3">
+                <div class="small fw-bold text-secondary">งวดประจำวันที่</div>
+                <div class="fs-5 fw-bold text-danger" id="bill_drawDate"></div>
+                <div class="small text-muted mt-2">หมายเลขที่ซื้อ</div>
+                <div id="bill_numbersContainer" class="my-2"></div>
+                <div class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-bold" id="bill_prize"></div>
+              </div>
+
+              <div class="border-top pt-2 small">
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-muted">ชื่อผู้ซื้อ:</span>
+                  <span class="fw-bold" id="bill_custName"></span>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-muted">เบอร์โทรศัพท์:</span>
+                  <span class="fw-bold" id="bill_custPhone"></span>
+                </div>
+                <div class="d-flex justify-content-between py-1 border-top mt-1 pt-2 fs-6">
+                  <span class="fw-bold text-dark">ยอดชำระทั้งสิ้น:</span>
+                  <span class="fw-bold text-danger" id="bill_totalAmount"></span>
+                </div>
+              </div>
+
+              <div class="text-center mt-3 pt-2 border-top">
+                <span class="badge bg-success rounded-pill px-3 py-1">
+                  <i class="fa-solid fa-circle-check me-1"></i> ชำระเงินเรียบร้อยแล้ว
+                </span>
+                <div class="text-muted mt-1" style="font-size: 0.7rem;">ขอให้ท่านโชคดีถูกรางวัลใหญ่ในงวดนี้</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ปุ่มกดบันทึกบิลเป็นรูปภาพ -->
+          <div class="text-center mt-3 d-flex gap-2 justify-content-center">
+            <button class="btn btn-warning rounded-pill px-4 fw-bold shadow" onclick="downloadBillAsImage()">
+              <i class="fa-solid fa-download me-1"></i> บันทึกรูปบิลลงมือถือ
+            </button>
+            <button class="btn btn-light rounded-pill px-4 fw-bold shadow" data-bs-dismiss="modal">
+              ปิดหน้าต่าง
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: แก้ไขข้อมูลสำหรับ Admin ==================== -->
+  <div class="modal fade" id="editOrderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0">
+        <div class="modal-header bg-dark text-warning rounded-top-4">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>แก้ไขข้อมูลรายการซื้อ</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="edit_orderId">
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label small fw-bold">งวดวันที่</label>
+              <input type="date" id="edit_drawDate" class="form-control">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">เบอร์ 2 หลัก (00-99)</label>
+              <input type="text" id="edit_number" maxlength="2" class="form-control text-center fw-bold">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">ชื่อลูกค้า</label>
+              <input type="text" id="edit_customerName" class="form-control">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">เบอร์โทรศัพท์</label>
+              <input type="text" id="edit_phone" class="form-control">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">ราคา (บาท)</label>
+              <input type="number" id="edit_price" class="form-control">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">สถานะ</label>
+              <select id="edit_status" class="form-select">
+                <option value="ชำระเงินแล้ว">ชำระเงินแล้ว</option>
+                <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+                <option value="ยกเลิก">ยกเลิก (คืนเบอร์ว่าง)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-danger w-100 rounded-pill fw-bold mt-4" onclick="saveEditedOrder()">
+            <i class="fa-solid fa-check me-1"></i> บันทึกการแก้ไข
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ====================================================================
+    // นำ Web App URL ที่ได้จากการ Deploy Google Apps Script มาใส่ที่นี่
+    // ====================================================================
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbx1hIYWqeXAlG-D1hyVTUMXp0Ixv5wZpl6K9kZcPkg2nVH_ei16wh3aLDnj2MpstuSe/exec';
+
+    let appSettings = {};
+    let bookedMap = {};
+    let selectedNumbers = [];
+    let currentSlipBase64 = '';
+    let currentSlipMime = '';
+    let currentSlipName = '';
+    let adminPasswordCache = '';
+    let adminOrdersCache = [];
+
+    const thaiMonths = [
+      'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+      'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadBoardData();
+    });
+
+    function formatThaiDate(yyyy_mm_dd) {
+      if (!yyyy_mm_dd) return '';
+      const parts = String(yyyy_mm_dd).split('-');
+      if (parts.length !== 3) return yyyy_mm_dd;
+      const y = parseInt(parts[0], 10) + 543;
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      return `${d} ${thaiMonths[m] || ''} ${y}`;
+    }
+
+    // สร้างรายการตัวเลือกงวดวันที่ 1 และ 16 (ย้อนหลังและล่วงหน้า)
+    function populateDrawOptions(activeDraw) {
+      const sel = document.getElementById('drawSelector');
+      sel.innerHTML = '';
+      const now = new Date();
+      const draws = new Set();
+      if (activeDraw) draws.add(activeDraw);
+
+      for (let mOffset = -1; mOffset <= 2; mOffset++) {
+        const d1 = new Date(now.getFullYear(), now.getMonth() + mOffset, 1);
+        const d16 = new Date(now.getFullYear(), now.getMonth() + mOffset, 16);
+        [d1, d16].forEach(dt => {
+          const str = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+          draws.add(str);
+        });
+      }
+
+      const sortedDraws = Array.from(draws).sort();
+      sortedDraws.forEach(dStr => {
+        const opt = document.createElement('option');
+        opt.value = dStr;
+        opt.textContent = `งวด ${formatThaiDate(dStr)}`;
+        if (dStr === activeDraw) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    // เรียก API ไปยัง Google Apps Script
+    async function callApi(payload) {
+      const response = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return await response.json();
+    }
+
+    // โหลดข้อมูลตารางเบอร์ 00-99
+    async function loadBoardData(requestedDraw = '') {
+      Swal.fire({
+        title: 'กำลังโหลดแผงเบอร์ทอง...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const res = await callApi({ action: 'getInitData', drawDate: requestedDraw });
+        Swal.close();
+
+        if (res.status === 'success') {
+          appSettings = res.settings;
+          bookedMap = res.bookedNumbers || {};
+          selectedNumbers = [];
+
+          document.getElementById('headerDrawDate').textContent = formatThaiDate(appSettings.CurrentDraw);
+          document.getElementById('headerPrize').textContent = appSettings.GoldPrize;
+          document.getElementById('headerPrice').textContent = appSettings.TicketPrice;
+
+          populateDrawOptions(appSettings.CurrentDraw);
+          renderGrid();
+          updateCartBar();
+        } else {
+          Swal.fire('เกิดข้อผิดพลาด', res.message || 'ไม่สามารถโหลดข้อมูลได้', 'error');
+        }
+      } catch (err) {
+        Swal.close();
+        Swal.fire('เชื่อมต่อไม่สำเร็จ', 'กรุณาตรวจสอบการใส่ GAS_API_URL ในโค้ด', 'error');
+      }
+    }
+
+    // วาดแผงเบอร์ 00-99
+    function renderGrid() {
+      const grid = document.getElementById('lottoGrid');
+      grid.innerHTML = '';
+
+      let soldCount = 0;
+      for (let i = 0; i < 100; i++) {
+        const numStr = String(i).padStart(2, '0');
+        const bookedInfo = bookedMap[numStr];
+        const isSelected = selectedNumbers.includes(numStr);
+
+        const card = document.createElement('div');
+        if (bookedInfo) {
+          soldCount++;
+          card.className = 'num-card sold';
+          card.innerHTML = `
+            <div class="digits">${numStr}</div>
+            <div class="status-label"><i class="fa-solid fa-lock me-1"></i>${bookedInfo.buyer}</div>
+          `;
+          card.onclick = () => {
+            Swal.fire({
+              icon: 'info',
+              title: `เบอร์ ${numStr} ถูกซื้อแล้ว`,
+              text: `ผู้ซื้อ: ${bookedInfo.buyer} (${bookedInfo.status})`,
+              confirmButtonColor: '#8f0000'
+            });
+          };
+        } else {
+          card.className = 'num-card' + (isSelected ? ' selected' : '');
+          card.innerHTML = `
+            <div class="digits">${numStr}</div>
+            <div class="status-label">${isSelected ? 'เลือกแล้ว' : 'ว่าง'}</div>
+          `;
+          card.onclick = () => toggleSelectNumber(numStr);
+        }
+        grid.appendChild(card);
+      }
+
+      document.getElementById('countAvail').textContent = 100 - soldCount;
+      document.getElementById('countSold').textContent = soldCount;
+      document.getElementById('countSelected').textContent = selectedNumbers.length;
+    }
+
+    function toggleSelectNumber(numStr) {
+      const idx = selectedNumbers.indexOf(numStr);
+      if (idx > -1) {
+        selectedNumbers.splice(idx, 1);
+      } else {
+        selectedNumbers.push(numStr);
+      }
+      selectedNumbers.sort();
+      renderGrid();
+      updateCartBar();
+    }
+
+    function clearSelection() {
+      selectedNumbers = [];
+      renderGrid();
+      updateCartBar();
+    }
+
+    function updateCartBar() {
+      const bar = document.getElementById('bottomCartBar');
+      if (selectedNumbers.length > 0) {
+        bar.style.display = 'block';
+        document.getElementById('cartCount').textContent = selectedNumbers.length;
+        document.getElementById('cartNumbersList').textContent = selectedNumbers.join(', ');
+        document.getElementById('cartTotalPrice').textContent = (selectedNumbers.length * appSettings.TicketPrice).toLocaleString();
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    // เปิดหน้าต่างชำระเงินและสร้าง QR Code พร้อมเพย์ตามยอดเงิน
+    function openCheckoutModal() {
+      if (selectedNumbers.length === 0) return;
+      const totalAmount = selectedNumbers.length * appSettings.TicketPrice;
+
+      document.getElementById('modalDrawDate').textContent = formatThaiDate(appSettings.CurrentDraw);
+      document.getElementById('modalSelectedNums').textContent = selectedNumbers.join(', ');
+      document.getElementById('modalTotalAmount').textContent = totalAmount.toLocaleString();
+      document.getElementById('modalAccountName').textContent = appSettings.AccountName;
+      document.getElementById('modalPromptPayId').textContent = appSettings.PromptPayID;
+
+      const cleanPromptPay = String(appSettings.PromptPayID).replace(/[^0-9]/g, '');
+      document.getElementById('promptPayQrImg').src = `https://promptpay.io/${cleanPromptPay}/${totalAmount}.png`;
+
+      document.getElementById('slipFileInput').value = '';
+      document.getElementById('slipPreviewBox').style.display = 'none';
+      currentSlipBase64 = '';
+
+      new bootstrap.Modal(document.getElementById('checkoutModal')).show();
+    }
+
+    // ย่อขนาดและแสดงตัวอย่างรูปสลิปก่อนอัปโหลด
+    function previewSlipImage(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      currentSlipName = file.name;
+      currentSlipMime = 'image/jpeg';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1000;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          currentSlipBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+          document.getElementById('slipPreviewImg').src = currentSlipBase64;
+          document.getElementById('slipPreviewBox').style.display = 'block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ยืนยันการสั่งซื้อ
+    async function submitOrder() {
+      const name = document.getElementById('custNameInput').value.trim();
+      const phone = document.getElementById('custPhoneInput').value.trim();
+
+      if (!name || !phone) {
+        Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อและเบอร์โทรศัพท์ให้ครบถ้วน', 'warning');
+        return;
+      }
+      if (!currentSlipBase64) {
+        Swal.fire('กรุณาแนบสลิป', 'กรุณาอัปโหลดรูปภาพสลิปการโอนเงิน', 'warning');
+        return;
+      }
+
+      Swal.fire({
+        title: 'กำลังบันทึกและออกบิล...',
+        text: 'ระบบกำลังอัปโหลดสลิปและสร้างบิลให้ท่าน',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const res = await callApi({
+          action: 'bookNumbers',
+          drawDate: appSettings.CurrentDraw,
+          numbers: selectedNumbers,
+          customerName: name,
+          phone: phone,
+          slipBase64: currentSlipBase64,
+          slipMimeType: currentSlipMime,
+          slipFileName: currentSlipName
+        });
+
+        Swal.close();
+
+        if (res.status === 'success') {
+          bootstrap.Modal.getInstance(document.getElementById('checkoutModal')).hide();
+          showDigitalBill(res.billData);
+          loadBoardData(appSettings.CurrentDraw);
+        } else {
+          Swal.fire('ไม่สามารถจองได้', res.message, 'error');
+          loadBoardData(appSettings.CurrentDraw);
+        }
+      } catch (err) {
+        Swal.close();
+        Swal.fire('เกิดข้อผิดพลาด', err.toString(), 'error');
+      }
+    }
+
+    // แสดงบิลใบเสร็จรับเงินดิจิทัล
+    function showDigitalBill(bill) {
+      document.getElementById('bill_ref').textContent = bill.billRef;
+      document.getElementById('bill_time').textContent = bill.timestamp;
+      document.getElementById('bill_drawDate').textContent = formatThaiDate(bill.drawDate);
+      document.getElementById('bill_prize').textContent = `ลุ้นรางวัล: ${bill.goldPrize || appSettings.GoldPrize}`;
+      document.getElementById('bill_custName').textContent = bill.customerName;
+      document.getElementById('bill_custPhone').textContent = bill.phone;
+      document.getElementById('bill_totalAmount').textContent = `${Number(bill.totalAmount).toLocaleString()} บาท`;
+
+      const numContainer = document.getElementById('bill_numbersContainer');
+      numContainer.innerHTML = '';
+      bill.numbers.forEach(n => {
+        const badge = document.createElement('span');
+        badge.className = 'bill-number-badge';
+        badge.textContent = n;
+        numContainer.appendChild(badge);
+      });
+
+      new bootstrap.Modal(document.getElementById('billModal')).show();
+    }
+
+    // ดาวน์โหลดบิลเป็นไฟล์รูปภาพ PNG
+    function downloadBillAsImage() {
+      const billArea = document.getElementById('billCaptureArea');
+      const billRef = document.getElementById('bill_ref').textContent || 'LottoBonus';
+
+      html2canvas(billArea, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `บิลหวยเบอร์ทอง_${billRef}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+
+    // ====================================================================
+    // ระบบค้นหาประวัติการซื้อของลูกค้า
+    // ====================================================================
+    async function searchCustomerHistory() {
+      const kw = document.getElementById('searchInput').value.trim();
+      if (!kw) {
+        Swal.fire('แจ้งเตือน', 'กรุณากรอกชื่อ หรือ เบอร์โทรศัพท์เพื่อค้นหา', 'warning');
+        return;
+      }
+
+      Swal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      try {
+        const res = await callApi({ action: 'searchHistory', keyword: kw });
+        Swal.close();
+
+        const container = document.getElementById('searchResultsArea');
+        container.innerHTML = '';
+
+        if (res.status === 'success' && res.data.length > 0) {
+          res.data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card border-0 shadow-sm rounded-4 mb-3';
+            card.innerHTML = `
+              <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="bill-number-badge m-0">${item.number}</div>
+                  <div>
+                    <div class="fw-bold text-danger">งวดวันที่ ${formatThaiDate(item.drawDate)}</div>
+                    <div class="small fw-semibold">${item.customerName} (${item.phone})</div>
+                    <div class="text-muted" style="font-size:0.75rem;">รหัสบิล: ${item.billRef} | ${item.timestamp}</div>
+                  </div>
+                </div>
+                <div class="text-end">
+                  <div class="badge bg-success mb-2">${item.status}</div>
+                  <div>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick='reprintCustomerBill(${JSON.stringify(item)})'>
+                      <i class="fa-solid fa-image me-1"></i> ดูบิลรูปภาพ
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+              <i class="fa-regular fa-folder-open fa-3x mb-2"></i>
+              <div>ไม่พบประวัติการสั่งซื้อจากข้อมูลที่ค้นหา</div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        Swal.close();
+        Swal.fire('ผิดพลาด', err.toString(), 'error');
+      }
+    }
+
+    function reprintCustomerBill(item) {
+      showDigitalBill({
+        billRef: item.billRef || item.orderId,
+        timestamp: item.timestamp,
+        drawDate: item.drawDate,
+        numbers: [item.number],
+        customerName: item.customerName,
+        phone: item.phone,
+        totalAmount: item.price,
+        goldPrize: appSettings.GoldPrize
+      });
+    }
+
+    // ====================================================================
+    // ระบบจัดการหลังบ้าน (Admin CRUD)
+    // ====================================================================
+    async function loginAdmin() {
+      const pass = document.getElementById('adminPassInput').value.trim();
+      if (!pass) return;
+      adminPasswordCache = pass;
+      await loadAdminData();
+    }
+
+    async function loadAdminData() {
+      Swal.fire({ title: 'กำลังโหลดข้อมูลหลังบ้าน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      try {
+        const res = await callApi({ action: 'adminGetOrders', password: adminPasswordCache });
+        Swal.close();
+
+        if (res.status === 'success') {
+          document.getElementById('adminLoginCard').style.display = 'none';
+          document.getElementById('adminDashboardArea').style.display = 'block';
+
+          adminOrdersCache = res.orders || [];
+          const s = res.settings || {};
+          document.getElementById('set_CurrentDraw').value = s.CurrentDraw || '';
+          document.getElementById('set_TicketPrice').value = s.TicketPrice || '';
+          document.getElementById('set_PromptPayID').value = s.PromptPayID || '';
+          document.getElementById('set_AccountName').value = s.AccountName || '';
+          document.getElementById('set_GoldPrize').value = s.GoldPrize || '';
+          document.getElementById('set_AdminPassword').value = s.AdminPassword || '';
+
+          renderAdminTable();
+        } else {
+          Swal.fire('เข้าสู่ระบบไม่สำเร็จ', res.message, 'error');
+        }
+      } catch (err) {
+        Swal.close();
+        Swal.fire('ผิดพลาด', err.toString(), 'error');
+      }
+    }
+
+    function renderAdminTable() {
+      const kw = (document.getElementById('adminFilterInput').value || '').toLowerCase();
+      const tbody = document.getElementById('adminTableBody');
+      tbody.innerHTML = '';
+
+      const filtered = adminOrdersCache.filter(o =>
+        o.customerName.toLowerCase().includes(kw) ||
+        o.phone.toLowerCase().includes(kw) ||
+        o.number.includes(kw) ||
+        o.drawDate.includes(kw)
+      );
+
+      document.getElementById('adminTotalRows').textContent = filtered.length;
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        const slipBtn = item.slipUrl
+          ? `<a href="${item.slipUrl}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fa-solid fa-image"></i> ดูสลิป</a>`
+          : '-';
+
+        tr.innerHTML = `
+          <td>${formatThaiDate(item.drawDate)}</td>
+          <td class="text-center"><span class="badge bg-danger fs-6">${item.number}</span></td>
+          <td class="fw-semibold">${item.customerName}</td>
+          <td>${item.phone}</td>
+          <td>${item.price} ฿</td>
+          <td class="text-center">${slipBtn}</td>
+          <td><span class="badge ${item.status === 'ชำระเงินแล้ว' ? 'bg-success' : 'bg-secondary'}">${item.status}</span></td>
+          <td class="text-center text-nowrap">
+            <button class="btn btn-sm btn-warning rounded-circle me-1" onclick='openEditModal(${JSON.stringify(item)})' title="แก้ไข">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-danger rounded-circle" onclick="deleteOrderItem('${item.orderId}', '${item.number}')" title="ลบ">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openEditModal(item) {
+      document.getElementById('edit_orderId').value = item.orderId;
+      document.getElementById('edit_drawDate').value = item.drawDate;
+      document.getElementById('edit_number').value = item.number;
+      document.getElementById('edit_customerName').value = item.customerName;
+      document.getElementById('edit_phone').value = item.phone;
+      document.getElementById('edit_price').value = item.price;
+      document.getElementById('edit_status').value = item.status;
+
+      new bootstrap.Modal(document.getElementById('editOrderModal')).show();
+    }
+
+    async function saveEditedOrder() {
+      const payload = {
+        action: 'adminUpdateOrder',
+        password: adminPasswordCache,
+        orderId: document.getElementById('edit_orderId').value,
+        drawDate: document.getElementById('edit_drawDate').value,
+        number: document.getElementById('edit_number').value,
+        customerName: document.getElementById('edit_customerName').value,
+        phone: document.getElementById('edit_phone').value,
+        price: document.getElementById('edit_price').value,
+        status: document.getElementById('edit_status').value
+      };
+
+      Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      const res = await callApi(payload);
+      Swal.close();
+
+      if (res.status === 'success') {
+        bootstrap.Modal.getInstance(document.getElementById('editOrderModal')).hide();
+        Swal.fire('สำเร็จ', res.message, 'success');
+        loadAdminData();
+        loadBoardData(appSettings.CurrentDraw);
+      } else {
+        Swal.fire('ผิดพลาด', res.message, 'error');
+      }
+    }
+
+    async function deleteOrderItem(orderId, num) {
+      const confirm = await Swal.fire({
+        title: `ยืนยันการลบเบอร์ ${num}?`,
+        text: 'เมื่อลบแล้ว เบอร์นี้จะกลับมาว่างให้ผู้อื่นเลือกซื้อได้ทันที',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'ลบข้อมูล',
+        cancelButtonText: 'ยกเลิก'
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      Swal.fire({ title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      const res = await callApi({
+        action: 'adminDeleteOrder',
+        password: adminPasswordCache,
+        orderId: orderId
+      });
+      Swal.close();
+
+      if (res.status === 'success') {
+        Swal.fire('ลบสำเร็จ', res.message, 'success');
+        loadAdminData();
+        loadBoardData(appSettings.CurrentDraw);
+      } else {
+        Swal.fire('ผิดพลาด', res.message, 'error');
+      }
+    }
+
+    async function saveSystemSettings() {
+      const newSettings = {
+        CurrentDraw: document.getElementById('set_CurrentDraw').value,
+        TicketPrice: document.getElementById('set_TicketPrice').value,
+        PromptPayID: document.getElementById('set_PromptPayID').value,
+        AccountName: document.getElementById('set_AccountName').value,
+        GoldPrize: document.getElementById('set_GoldPrize').value,
+        AdminPassword: document.getElementById('set_AdminPassword').value
+      };
+
+      Swal.fire({ title: 'กำลังบันทึกการตั้งค่า...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      const res = await callApi({
+        action: 'adminSaveSettings',
+        password: adminPasswordCache,
+        newSettings: newSettings
+      });
+      Swal.close();
+
+      if (res.status === 'success') {
+        adminPasswordCache = newSettings.AdminPassword;
+        Swal.fire('บันทึกสำเร็จ', res.message, 'success');
+        loadBoardData(newSettings.CurrentDraw);
+      } else {
+        Swal.fire('ผิดพลาด', res.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
