@@ -9,10 +9,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
   
-  <!-- SweetAlert2 พร้อม Animate.css สำหรับลูกเล่นแอนิเมชัน -->
+  <!-- SweetAlert2 & Animate.css -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
@@ -34,12 +33,11 @@
       color: #333;
     }
 
-    /* Banner Image */
     .banner-img {
       width: 100%;
       height: auto;
       object-fit: cover;
-      box-shadow: 0 10px 20px rgba(0, 82, 212, 0.2);
+      box-shadow: 0 10px 25px rgba(0, 82, 212, 0.25);
     }
     
     .footer-img {
@@ -52,20 +50,43 @@
       display: block;
     }
 
-    /* Info Bar */
-    .info-bar {
-      background: linear-gradient(135deg, var(--dark-blue), var(--mid-blue));
+    /* 🔥 ดีไซน์งวดแบบเรืองแสงสะดุดตา 🔥 */
+    .draw-date-glow {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
       color: #fff;
-      padding: 12px 20px;
-      border-radius: 50px;
-      box-shadow: 0 4px 15px rgba(0, 82, 212, 0.25);
-      margin-top: -20px;
+      padding: 18px 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(67, 100, 247, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.2);
+      border: 2px solid #6FB1FC;
+      margin-top: -30px;
       position: relative;
       z-index: 10;
-      border: 2px solid #fff;
+      text-align: center;
+      animation: glowPulse 2s infinite alternate;
+    }
+    @keyframes glowPulse {
+      from { box-shadow: 0 0 15px rgba(67, 100, 247, 0.4), inset 0 0 10px rgba(255,255,255,0.1); }
+      to { box-shadow: 0 0 30px rgba(111, 177, 252, 0.8), inset 0 0 15px rgba(255,255,255,0.3); }
+    }
+    .draw-date-glow h3 {
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin: 0;
+      color: #fbc02d;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
 
-    /* Modern Tabs */
+    .info-bar {
+      background: #fff;
+      border-radius: 20px;
+      padding: 15px 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
     .nav-custom {
       background: #fff;
       border-radius: 50px;
@@ -89,7 +110,6 @@
       box-shadow: 0 4px 12px rgba(67, 100, 247, 0.3);
     }
 
-    /* Number Grid */
     .lotto-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -112,30 +132,17 @@
       user-select: none;
     }
     .num-card:active { transform: scale(0.95); }
-    
-    .num-card .digits {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #334e68;
-      line-height: 1;
-    }
-    .num-card .status-label {
-      font-size: 0.7rem;
-      color: #829ab1;
-      margin-top: 6px;
-      font-weight: 500;
-    }
+    .num-card .digits { font-size: 1.6rem; font-weight: 700; color: #334e68; line-height: 1; }
+    .num-card .status-label { font-size: 0.7rem; color: #829ab1; margin-top: 6px; font-weight: 500; }
 
-    /* Selected State (Blue Gradient) */
     .num-card.selected {
       background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
       border-color: var(--mid-blue);
-      box-shadow: 0 8px 20px rgba(0, 82, 212, 0.3);
-      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 82, 212, 0.4);
+      transform: translateY(-4px);
     }
     .num-card.selected .digits, .num-card.selected .status-label { color: #fff; }
 
-    /* Sold State */
     .num-card.sold {
       background: #e1e8ed;
       border-color: #d9e2ec;
@@ -143,9 +150,7 @@
       opacity: 0.7;
     }
     .num-card.sold .digits { color: #9fb3c8; text-decoration: line-through; }
-    .num-card.sold .status-label { color: #829ab1; }
 
-    /* Bottom Floating Cart */
     .bottom-cart-bar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -164,13 +169,40 @@
       background: linear-gradient(135deg, var(--primary-blue), var(--mid-blue));
       color: white;
       border: none;
+      transition: all 0.3s ease;
     }
     .btn-gradient:hover {
       background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
       color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 82, 212, 0.4);
     }
 
-    /* Digital Bill Card (Blue Theme) */
+    /* กล่องคัดลอกบัญชี */
+    .account-box {
+      background: #f8fbff;
+      border: 2px dashed var(--mid-blue);
+      border-radius: 15px;
+      padding: 15px;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .copy-btn:active { transform: translateY(-50%) scale(0.9); }
+
+    /* Digital Bill */
     #billCaptureArea {
       background: #fff;
       border-radius: 20px;
@@ -203,23 +235,25 @@
 </head>
 <body>
 
-  <!-- รูปภาพปกเว็บ (Header) -->
   <header>
     <img src="https://i.postimg.cc/7YP71khG/baen-nex-r-Lotto-Bonus-mngk-d-thxng-s-dhr.png" alt="Lotto Bonus Banner" class="banner-img">
   </header>
 
   <div class="container" style="max-width: 900px;">
     
-    <!-- Info Bar -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center info-bar mx-auto" style="max-width: 800px;">
-      <div class="fw-bold mb-1 mb-md-0">
-        <i class="fa-regular fa-calendar-check text-warning me-1"></i> งวด: <span id="headerDrawDate" class="text-warning">กำลังโหลด...</span>
+    <!-- ป้ายงวดประจำวันที่เรืองแสงสะดุดตา -->
+    <div class="draw-date-glow mx-auto" style="max-width: 600px;">
+      <div class="small mb-1 text-white-50"><i class="fa-regular fa-calendar-check me-1"></i> เปิดรับจองงวดประจำวันที่</div>
+      <h3 id="headerDrawDate">กำลังโหลด...</h3>
+    </div>
+
+    <!-- แถบข้อมูลราคาและรางวัล -->
+    <div class="info-bar mx-auto align-items-center" style="max-width: 600px;">
+      <div class="fw-bold fs-5" style="color: var(--primary-blue);">
+        <i class="fa-solid fa-sack-dollar text-warning me-1"></i> รางวัล <span id="headerPrize">6,000 บาท</span>
       </div>
-      <div class="fw-bold">
-        <i class="fa-solid fa-sack-dollar text-warning me-1"></i> รางวัล <span id="headerPrize" class="text-warning">6,000 บาท</span>
-      </div>
-      <div class="badge bg-white text-primary rounded-pill px-3 py-2 fs-6 shadow-sm mt-2 mt-md-0">
-        เบอร์ละ <span class="fw-bold text-danger" id="headerPrice">100</span> ฿
+      <div class="badge bg-danger text-white rounded-pill px-4 py-2 fs-6 shadow-sm">
+        เบอร์ละ <span class="fw-bold fs-5" id="headerPrice">100</span> ฿
       </div>
     </div>
 
@@ -245,8 +279,8 @@
             <i class="fa-solid fa-circle-check me-1"></i> เบอร์ว่าง <span id="countAvail" class="fs-5">0</span>
           </div>
           <div class="d-flex gap-3 small fw-semibold text-muted">
-            <span><i class="fa-solid fa-square" style="color: var(--light-blue);"></i> เลือกแล้ว (<span id="countSelected">0</span>)</span>
-            <span><i class="fa-solid fa-square" style="color:#d9e2ec;"></i> ขายแล้ว (<span id="countSold">0</span>)</span>
+            <span><i class="fa-solid fa-square" style="color: var(--light-blue);"></i> เลือกแล้ว</span>
+            <span><i class="fa-solid fa-square" style="color:#d9e2ec;"></i> ขายแล้ว</span>
           </div>
         </div>
 
@@ -254,7 +288,6 @@
           <!-- JS Generate Grid -->
         </div>
 
-        <!-- รูปภาพ Footer ด้านล่างสุดของตารางเบอร์ -->
         <div class="mt-4 mb-5 text-center">
           <img src="https://i.postimg.cc/8Pyvt0fy/Lotto-Bonus-c-aywi-c-aycr-ng-100.png" alt="การันตีจ่ายจริง" class="footer-img">
         </div>
@@ -282,7 +315,7 @@
         <div class="fs-4 fw-bold lh-1" style="color: var(--primary-blue);"><span id="cartTotalPrice">0</span> ฿</div>
       </div>
       <div>
-        <button class="btn btn-gradient btn-lg rounded-pill px-4 fw-bold shadow-sm" onclick="openCheckout()">
+        <button class="btn btn-gradient btn-lg rounded-pill px-4 fw-bold shadow" onclick="openCheckout()">
           ชำระเงิน <i class="fa-solid fa-arrow-right ms-1"></i>
         </button>
       </div>
@@ -298,13 +331,17 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">
-          <div class="p-3 rounded-4 text-center mb-4" style="background: #f0f4f8; border: 1px dashed var(--mid-blue);">
+          <div class="text-center mb-4">
             <div class="text-muted small">ยอดโอนสุทธิ</div>
-            <div class="fs-1 fw-bold mb-3" style="color: var(--primary-blue);"><span id="modalTotalAmount"></span>.-</div>
+            <div class="fs-1 fw-bold mb-2" style="color: var(--primary-blue);"><span id="modalTotalAmount"></span>.-</div>
             
-            <img id="promptPayQrImg" src="" class="img-fluid rounded-3 shadow-sm bg-white p-2 mb-2" style="width: 200px;">
-            <div class="fw-bold text-dark" id="modalAccountName"></div>
-            <div class="small text-muted">พร้อมเพย์: <span id="modalPromptPayId"></span></div>
+            <!-- กล่องแสดงเลขบัญชีแบบใหม่ -->
+            <div class="account-box mt-3 text-start ps-3 py-3">
+              <div class="small text-muted mb-1">โอนเงินเข้าบัญชี:</div>
+              <div class="fw-bold text-dark mb-1" id="modalAccountName"></div>
+              <div class="fs-5 fw-bold" style="color: var(--primary-blue);" id="modalBankNumber"></div>
+              <button class="copy-btn shadow-sm" onclick="copyAccountNumber()"><i class="fa-regular fa-copy me-1"></i>คัดลอก</button>
+            </div>
           </div>
 
           <div class="mb-3">
@@ -321,7 +358,7 @@
             </div>
           </div>
 
-          <button class="btn btn-gradient btn-lg w-100 rounded-pill fw-bold" onclick="submitOrder()">
+          <button class="btn btn-gradient btn-lg w-100 rounded-pill fw-bold shadow" onclick="submitOrder()">
             ยืนยันการสั่งซื้อ
           </button>
         </div>
@@ -388,15 +425,17 @@
     // ==========================================================
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbx1hIYWqeXAlG-D1hyVTUMXp0Ixv5wZpl6K9kZcPkg2nVH_ei16wh3aLDnj2MpstuSe/exec';
 
-    // ตั้งค่าธีม SweetAlert2 แบบ Custom
+    // 🔥 ตั้งค่าลูกเล่น SweetAlert2 สุดพรีเมียม 🔥
     const mySwal = Swal.mixin({
       customClass: {
-        confirmButton: 'btn btn-gradient rounded-pill px-4 ms-2',
-        cancelButton: 'btn btn-light rounded-pill px-4'
+        confirmButton: 'btn btn-gradient rounded-pill px-4 ms-2 shadow-lg',
+        cancelButton: 'btn btn-light rounded-pill px-4 shadow-sm',
+        popup: 'rounded-4 border-0 shadow-lg'
       },
       buttonsStyling: false,
-      showClass: { popup: 'animate__animated animate__fadeInDown animate__faster' },
-      hideClass: { popup: 'animate__animated animate__fadeOutUp animate__faster' }
+      backdrop: `rgba(0, 51, 128, 0.4)`, /* พื้นหลังสีน้ำเงินเข้มโปร่งแสง */
+      showClass: { popup: 'animate__animated animate__zoomIn animate__faster' },
+      hideClass: { popup: 'animate__animated animate__zoomOut animate__faster' }
     });
 
     let appSettings = {};
@@ -423,10 +462,10 @@
 
     async function loadData() {
       mySwal.fire({ 
-        title: 'กำลังเชื่อมต่อระบบ...', 
-        html: 'โปรดรอสักครู่ ระบบกำลังดึงข้อมูลล่าสุด',
-        allowOutsideClick: false, 
-        didOpen: () => Swal.showLoading() 
+        title: 'กำลังเชื่อมต่อระบบ', 
+        html: '<div class="spinner-border text-primary my-2" role="status"></div><br><span class="text-muted small">โปรดรอสักครู่ ระบบกำลังดึงข้อมูลล่าสุด</span>',
+        allowOutsideClick: false,
+        showConfirmButton: false
       });
       
       try {
@@ -470,11 +509,12 @@
           div.innerHTML = `<div class="digits">${numStr}</div><div class="status-label"><i class="fa-solid fa-lock"></i> ปิดขาย</div>`;
           div.onclick = () => {
              mySwal.fire({
-               icon: 'info',
-               title: 'ปิดขายแล้ว',
-               text: `เบอร์ ${numStr} มีผู้สั่งซื้อไปแล้วครับ`,
+               icon: 'error',
+               title: 'เบอร์นี้ปิดขายแล้ว',
+               text: `หมายเลข ${numStr} มีผู้สั่งซื้อไปแล้วครับ`,
                timer: 2000,
-               showConfirmButton: false
+               showConfirmButton: false,
+               showClass: { popup: 'animate__animated animate__shakeX' }
              });
           };
         } else {
@@ -485,7 +525,6 @@
         grid.appendChild(div);
       }
       document.getElementById('countAvail').textContent = 100 - sold;
-      document.getElementById('countSold').textContent = sold;
       document.getElementById('countSelected').textContent = selectedNumbers.length;
     }
 
@@ -514,12 +553,26 @@
       const total = selectedNumbers.length * appSettings.TicketPrice;
       document.getElementById('modalTotalAmount').textContent = total.toLocaleString();
       document.getElementById('modalAccountName').textContent = appSettings.AccountName;
-      document.getElementById('modalPromptPayId').textContent = appSettings.PromptPayID;
-      
-      const pp = String(appSettings.PromptPayID).replace(/[^0-9]/g, '');
-      document.getElementById('promptPayQrImg').src = `https://promptpay.io/${pp}/${total}.png`;
+      document.getElementById('modalBankNumber').textContent = appSettings.PromptPayID; // ดึงเลขบัญชีมาแสดง
       
       new bootstrap.Modal(document.getElementById('checkoutModal')).show();
+    }
+
+    // ฟังก์ชันสำหรับกดปุ่มคัดลอกเลขบัญชี
+    function copyAccountNumber() {
+      const accNum = document.getElementById('modalBankNumber').textContent;
+      navigator.clipboard.writeText(accNum).then(() => {
+        mySwal.fire({
+          icon: 'success',
+          title: 'คัดลอกสำเร็จ',
+          text: 'เลขบัญชีถูกคัดลอกไปยังคลิปบอร์ดแล้ว',
+          toast: true,
+          position: 'top',
+          timer: 2000,
+          showConfirmButton: false,
+          showClass: { popup: 'animate__animated animate__slideInDown animate__faster' }
+        });
+      });
     }
 
     function previewSlip(input) {
@@ -542,7 +595,7 @@
           currentSlipBase64 = canvas.toDataURL('image/jpeg', 0.8);
           document.getElementById('slipPreviewImg').src = currentSlipBase64;
           document.getElementById('slipPreviewBox').style.display = 'block';
-          document.getElementById('slipPreviewBox').classList.add('animate__animated', 'animate__fadeIn');
+          document.getElementById('slipPreviewBox').classList.add('animate__animated', 'animate__zoomIn');
         };
         img.src = e.target.result;
       };
@@ -553,10 +606,21 @@
       const name = document.getElementById('custNameInput').value.trim();
       const phone = document.getElementById('custPhoneInput').value.trim();
       if (!name || !phone || !currentSlipBase64) {
-        return mySwal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกชื่อ เบอร์โทร และแนบสลิปโอนเงิน' });
+        return mySwal.fire({ 
+          icon: 'warning', 
+          title: 'ข้อมูลไม่ครบถ้วน', 
+          text: 'กรุณากรอกชื่อ เบอร์โทร และแนบสลิปโอนเงินให้เรียบร้อยครับ',
+          showClass: { popup: 'animate__animated animate__headShake' }
+        });
       }
 
-      mySwal.fire({ title: 'กำลังออกบิล...', html: 'โปรดรอสักครู่ ระบบกำลังอัปโหลดข้อมูล', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      mySwal.fire({ 
+        title: 'กำลังดำเนินการ...', 
+        html: '<div class="spinner-border text-primary my-2" role="status"></div><br><span class="text-muted small">ระบบกำลังจองเบอร์และออกบิลให้ท่าน</span>', 
+        allowOutsideClick: false, 
+        showConfirmButton: false
+      });
+
       try {
         const res = await callApi({
           action: 'bookNumbers', drawDate: appSettings.CurrentDraw,
@@ -568,20 +632,26 @@
         if (res.status === 'success') {
           bootstrap.Modal.getInstance(document.getElementById('checkoutModal')).hide();
           
-          // โชว์แอนิเมชันสำเร็จ
           mySwal.fire({
             icon: 'success',
             title: 'สั่งซื้อสำเร็จ!',
             text: 'ระบบได้ออกบิลให้ท่านเรียบร้อยแล้ว',
             timer: 2000,
-            showConfirmButton: false
+            showConfirmButton: false,
+            showClass: { popup: 'animate__animated animate__tada' } // ลูกเล่นเด้งดีใจ
           }).then(() => {
             showBill(res.billData);
             loadData();
           });
           
         } else {
-          mySwal.fire({ icon: 'error', title: 'ผิดพลาด', text: res.message });
+          // หากโดนแย่งซื้อระหว่างทำรายการ ระบบจะเด้งบอกทันที
+          mySwal.fire({ 
+            icon: 'error', 
+            title: 'การจองไม่สำเร็จ', 
+            text: res.message,
+            showClass: { popup: 'animate__animated animate__shakeX' }
+          });
           loadData();
         }
       } catch (err) {
@@ -603,7 +673,7 @@
       box.innerHTML = '';
       b.numbers.forEach(n => {
         const span = document.createElement('span');
-        span.className = 'bill-number-badge animate__animated animate__zoomIn';
+        span.className = 'bill-number-badge animate__animated animate__flipInY';
         span.textContent = n;
         box.appendChild(span);
       });
@@ -622,9 +692,10 @@
           toast: true,
           position: 'top-end',
           icon: 'success',
-          title: 'บันทึกรูปบิลสำเร็จ',
+          title: 'บันทึกรูปบิลลงเครื่องสำเร็จ',
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          showClass: { popup: 'animate__animated animate__fadeInRight' }
         });
       });
     }
@@ -633,7 +704,13 @@
       const kw = document.getElementById('searchInput').value.trim();
       if (!kw) return mySwal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกชื่อ หรือ เบอร์โทร' });
       
-      mySwal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      mySwal.fire({ 
+        title: 'กำลังค้นหา...', 
+        html: '<div class="spinner-grow text-primary my-2" role="status"></div>',
+        allowOutsideClick: false, 
+        showConfirmButton: false 
+      });
+      
       const res = await callApi({ action: 'searchHistory', keyword: kw });
       mySwal.close();
       
@@ -662,7 +739,7 @@
             </div>`;
         });
       } else {
-        box.innerHTML = `<div class="text-center text-muted py-4 animate__animated animate__fadeIn"><i class="fa-solid fa-box-open fa-3x mb-3" style="color: var(--light-blue);"></i><br>ไม่พบประวัติการซื้อ</div>`;
+        box.innerHTML = `<div class="text-center text-muted py-5 animate__animated animate__fadeIn"><i class="fa-solid fa-folder-open fa-3x mb-3" style="color: var(--light-blue);"></i><br><h5 class="fw-bold mt-2">ไม่พบประวัติการซื้อ</h5><span class="small">ลองค้นหาด้วยเบอร์โทรศัพท์หรือชื่ออีกครั้ง</span></div>`;
       }
     }
   </script>
