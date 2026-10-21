@@ -150,6 +150,7 @@
       opacity: 0.7;
     }
     .num-card.sold .digits { color: #9fb3c8; text-decoration: line-through; }
+    .num-card.sold .status-label { color: #829ab1; }
 
     .bottom-cart-bar {
       position: fixed;
@@ -274,13 +275,15 @@
     <div class="tab-content">
       <!-- TAB 1: เลือกเบอร์ -->
       <div class="tab-pane fade show active" id="tabBoard">
+        
+        <!-- แก้ไขบั๊กตัวเลข เลือกแล้ว/ขายแล้ว ตรงนี้ครับ โดยใส่ id ให้ครบ -->
         <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 shadow-sm">
           <div class="fw-bold" style="color: var(--primary-blue);">
-            <i class="fa-solid fa-circle-check me-1"></i> เบอร์ว่าง <span id="countAvail" class="fs-5">0</span>
+            <i class="fa-solid fa-circle-check me-1"></i> เบอร์ว่าง <span id="countAvail" class="fs-5 text-danger">0</span>
           </div>
           <div class="d-flex gap-3 small fw-semibold text-muted">
-            <span><i class="fa-solid fa-square" style="color: var(--light-blue);"></i> เลือกแล้ว</span>
-            <span><i class="fa-solid fa-square" style="color:#d9e2ec;"></i> ขายแล้ว</span>
+            <span><i class="fa-solid fa-square" style="color: var(--light-blue);"></i> เลือก (<span id="countSelected">0</span>)</span>
+            <span><i class="fa-solid fa-square" style="color:#d9e2ec;"></i> ขายแล้ว (<span id="countSold">0</span>)</span>
           </div>
         </div>
 
@@ -335,7 +338,6 @@
             <div class="text-muted small">ยอดโอนสุทธิ</div>
             <div class="fs-1 fw-bold mb-2" style="color: var(--primary-blue);"><span id="modalTotalAmount"></span>.-</div>
             
-            <!-- กล่องแสดงเลขบัญชีแบบใหม่ -->
             <div class="account-box mt-3 text-start ps-3 py-3">
               <div class="small text-muted mb-1">โอนเงินเข้าบัญชี:</div>
               <div class="fw-bold text-dark mb-1" id="modalAccountName"></div>
@@ -433,7 +435,7 @@
         popup: 'rounded-4 border-0 shadow-lg'
       },
       buttonsStyling: false,
-      backdrop: `rgba(0, 51, 128, 0.4)`, /* พื้นหลังสีน้ำเงินเข้มโปร่งแสง */
+      backdrop: `rgba(0, 51, 128, 0.4)`,
       showClass: { popup: 'animate__animated animate__zoomIn animate__faster' },
       hideClass: { popup: 'animate__animated animate__zoomOut animate__faster' }
     });
@@ -524,7 +526,10 @@
         }
         grid.appendChild(div);
       }
+      
+      // อัปเดตตัวเลขเบอร์ว่าง, เลือกแล้ว, ขายแล้ว โดยไม่ติดบั๊ก null
       document.getElementById('countAvail').textContent = 100 - sold;
+      document.getElementById('countSold').textContent = sold;
       document.getElementById('countSelected').textContent = selectedNumbers.length;
     }
 
@@ -553,12 +558,11 @@
       const total = selectedNumbers.length * appSettings.TicketPrice;
       document.getElementById('modalTotalAmount').textContent = total.toLocaleString();
       document.getElementById('modalAccountName').textContent = appSettings.AccountName;
-      document.getElementById('modalBankNumber').textContent = appSettings.PromptPayID; // ดึงเลขบัญชีมาแสดง
+      document.getElementById('modalBankNumber').textContent = appSettings.PromptPayID; 
       
       new bootstrap.Modal(document.getElementById('checkoutModal')).show();
     }
 
-    // ฟังก์ชันสำหรับกดปุ่มคัดลอกเลขบัญชี
     function copyAccountNumber() {
       const accNum = document.getElementById('modalBankNumber').textContent;
       navigator.clipboard.writeText(accNum).then(() => {
@@ -638,14 +642,13 @@
             text: 'ระบบได้ออกบิลให้ท่านเรียบร้อยแล้ว',
             timer: 2000,
             showConfirmButton: false,
-            showClass: { popup: 'animate__animated animate__tada' } // ลูกเล่นเด้งดีใจ
+            showClass: { popup: 'animate__animated animate__tada' }
           }).then(() => {
             showBill(res.billData);
             loadData();
           });
           
         } else {
-          // หากโดนแย่งซื้อระหว่างทำรายการ ระบบจะเด้งบอกทันที
           mySwal.fire({ 
             icon: 'error', 
             title: 'การจองไม่สำเร็จ', 
